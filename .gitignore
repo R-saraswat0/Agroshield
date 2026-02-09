@@ -1,0 +1,26 @@
+# Ignore Python virtual environments
+venv/
+flask-api/venv/
+
+# Ignore model and weight files
+*.h5
+
+# Ignore Python cache files
+*.pyc
+__pycache__/
+
+# Node modules
+node_modules/
+Backend/node_modules/
+Frontend/node_modules/
+
+# Environment variables
+.env
+Backend/.env
+Frontend/.env
+Frontend/.env.local
+Frontend/.env.production
+
+# Build files
+dist/
+build/
