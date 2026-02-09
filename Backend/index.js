@@ -22,7 +22,7 @@ app.use(express.json());
 
 // Middleware for handling CORS policy
 app.use(cors({
-  origin: ['https://agroshield.vercel.app', 'https://agroshield-*.vercel.app', 'http://localhost:5173'],
+  origin: ['https://agroshield-ashen.vercel.app', 'http://localhost:5173'],
   credentials: true
 }));
 
