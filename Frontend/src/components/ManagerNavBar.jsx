@@ -45,7 +45,7 @@ const NavigationBar = () => {
                 <FaLeaf className="text-green-200 text-3xl mr-2" />
                 <h1 className="text-3xl font-bold">
                     <Link to="/loghome" className="text-white hover:text-green-500 flex items-center">
-                        AgriGuard
+                        AgroShield
                     </Link>
                 </h1>
             </div>

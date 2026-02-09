@@ -41,7 +41,7 @@ const NavigationBar = () => {
         <header className="header top-0 sticky bg-transparent backdrop-filter backdrop-blur-lg flex items-center justify-between mx-auto px-16 left-0 w-full z-10">
             <div className="w-3/12">
                 <h1 className="text-3xl font-bold">
-                    <Link to="/loghome" className="text-white hover:text-green-500">AgriGuard</Link>
+                    <Link to="/loghome" className="text-white hover:text-green-500">AgroShield</Link>
                 </h1>
             </div>
 
