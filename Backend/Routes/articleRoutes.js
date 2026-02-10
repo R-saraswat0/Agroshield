@@ -19,7 +19,7 @@ const upload = multer({ storage: storage });
 
 const router = express.Router();
 
-router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]), async (req, res) => {
+router.post('/', async (req, res) => {
 
   try {
     const { title, content, link, image, video } = req.body;
@@ -27,9 +27,6 @@ router.post('/', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video',
     if (!title || !content) {
       return res.status(400).json({ message: 'Title and content are required' });
     }
-
-    // No need to check file size here as multer will handle it
-
 
     const newArticle = new Article({
       title,

@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
+import { API_URL } from '../config/api';
 
 const MenuBar = ({ editor }) => {
   if (!editor) {
@@ -110,7 +111,7 @@ const ArticleManagement = ({ isOpen, onClose }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:5557/api/articles');
+      const response = await axios.get(`${API_URL}/api/articles`);
       console.log('Fetch response:', response);
 
       if (response.data && Array.isArray(response.data)) {
@@ -146,7 +147,7 @@ const ArticleManagement = ({ isOpen, onClose }) => {
 
   const handleDelete = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:5557/api/articles/${id}`);
+      const response = await axios.delete(`${API_URL}/api/articles/${id}`);
       console.log('Delete response:', response);
   
       if (response.status === 200) {
@@ -169,7 +170,7 @@ const ArticleManagement = ({ isOpen, onClose }) => {
   
   const handleSave = async () => {
     try {
-      const response = await axios.put(`http://localhost:5557/api/articles/${editingArticle._id}`, {
+      const response = await axios.put(`${API_URL}/api/articles/${editingArticle._id}`, {
         title: editingArticle.title,
         content: editor.getHTML()
       });
