@@ -11,6 +11,7 @@ import articleRoutes from './Routes/articleRoutes.js';
 import alertRoutes from "./Routes/alertRoutes.js";
 import ManagerRoutes from "./Routes/ManagerRoutes.js";
 import activityRoutes from './Routes/activityRoutes.js';
+import seedRoute from './Routes/seedRoute.js';
 
 
 
@@ -52,6 +53,7 @@ app.use("/api/users", userRoutes);
 
 app.use('/manager', ManagerRoutes);
 app.use('/alerts', alertRoutes);
+app.use('/api', seedRoute);
 
 
 mongoose
