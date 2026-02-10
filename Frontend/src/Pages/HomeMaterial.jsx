@@ -11,6 +11,21 @@ import { FaEdit } from "react-icons/fa";
 import EditMaterial from "./EditMaterial";
 import ManagerNavBar from "../components/ManagerNavBar";
 
+const mockMaterials = [
+  { _id: '1', materialName: "NPK 20-20-20 Fertilizer", category: "Fertilizer", pricePerUnit: 850, unitType: "kg", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500" },
+  { _id: '2', materialName: "Organic Compost", category: "Fertilizer", pricePerUnit: 450, unitType: "kg", image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500" },
+  { _id: '3', materialName: "Urea Fertilizer", category: "Fertilizer", pricePerUnit: 650, unitType: "kg", image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500" },
+  { _id: '4', materialName: "Cypermethrin Insecticide", category: "Pesticide", pricePerUnit: 1200, unitType: "liters", image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=500" },
+  { _id: '5', materialName: "Neem Oil Pesticide", category: "Pesticide", pricePerUnit: 950, unitType: "liters", image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=500" },
+  { _id: '6', materialName: "Glyphosate Herbicide", category: "Herbicide", pricePerUnit: 1100, unitType: "liters", image: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=500" },
+  { _id: '7', materialName: "2,4-D Herbicide", category: "Herbicide", pricePerUnit: 850, unitType: "liters", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500" },
+  { _id: '8', materialName: "Potassium Sulphate", category: "Fertilizer", pricePerUnit: 1250, unitType: "kg", image: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=500" },
+  { _id: '9', materialName: "Micronutrient Mix", category: "Fertilizer", pricePerUnit: 350, unitType: "packs", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500" },
+  { _id: '10', materialName: "BT Pesticide", category: "Pesticide", pricePerUnit: 750, unitType: "packs", image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500" },
+  { _id: '11', materialName: "Paraquat Herbicide", category: "Herbicide", pricePerUnit: 1350, unitType: "liters", image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500" },
+  { _id: '12', materialName: "Chlorpyrifos Pesticide", category: "Pesticide", pricePerUnit: 1500, unitType: "liters", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500" }
+];
+
 const HomeMaterial = () => {
   const [materials, setMaterials] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -25,16 +40,11 @@ const HomeMaterial = () => {
 
   const fetchMaterials = () => {
     setLoading(true);
-    axios
-      .get("http://localhost:5557/materials")
-      .then((response) => {
-        setMaterials(response.data.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setLoading(false);
-      });
+    // Use mock data instead of API call
+    setTimeout(() => {
+      setMaterials(mockMaterials);
+      setLoading(false);
+    }, 500);
   };
 
   useEffect(() => {
