@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaShoppingCart, FaSearch } from 'react-icons/fa';
-import Navbar from '../components/Navbar';
 
 const mockMaterials = [
   {
@@ -133,8 +132,7 @@ const AgriStore = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen bg-gray-50 pt-20">
       
       <div className="container mx-auto px-4 py-8 mt-16">
         <div className="text-center mb-8">
