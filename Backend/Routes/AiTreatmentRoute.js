@@ -7,16 +7,35 @@ dotenv.config();
 const router = express.Router();
 const apiKey = process.env.GEMINI_API_KEY;
 
-if (!apiKey) {
-  console.error("Error: GEMINI_API_KEY is not defined in .env");
+if (!apiKey || apiKey === 'your_gemini_api_key_here') {
+  console.warn("Warning: GEMINI_API_KEY is not configured. AI features will use fallback responses.");
 }
 
-const genAI = new GoogleGenerativeAI(apiKey);
+const genAI = apiKey && apiKey !== 'your_gemini_api_key_here' ? new GoogleGenerativeAI(apiKey) : null;
 
-// Initialize Gemini model
-const model = genAI.getGenerativeModel({
+// Initialize Gemini model only if API key is valid
+const model = genAI ? genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
   systemInstruction: "Generate AI-based treatment recommendations for plant diseases in JSON format. Use simple and clear English.",
+}) : null;
+
+// Fallback treatment response when API key is not configured
+const getFallbackTreatment = (plantName, detectedDisease, preferredTreatmentType) => ({
+  disease_explanation: `${detectedDisease} is a common plant disease affecting ${plantName}. It typically causes damage to plant tissues and can spread if not treated promptly.`,
+  treatment_recommendations: {
+    organic: preferredTreatmentType === 'Organic' || preferredTreatmentType === 'Both' 
+      ? "Apply neem oil spray (5ml per liter of water) weekly. Use compost tea to boost plant immunity. Remove and destroy infected plant parts."
+      : null,
+    chemical: preferredTreatmentType === 'Chemical' || preferredTreatmentType === 'Both'
+      ? "Apply appropriate fungicide or pesticide as per label instructions. Ensure proper dosage and safety measures. Repeat application as recommended."
+      : null,
+    both: preferredTreatmentType === 'Both'
+      ? "Combine organic methods (neem oil, compost tea) with targeted chemical treatments for severe cases. Start with organic methods and use chemicals only if necessary."
+      : null
+  },
+  preventive_measures: "Maintain proper plant spacing for air circulation. Water at the base to keep foliage dry. Remove infected plant debris. Practice crop rotation. Use disease-resistant varieties when possible.",
+  best_recovery_practices: "Ensure adequate nutrition with balanced fertilizer. Maintain consistent watering schedule. Prune affected areas. Monitor plants regularly for early detection. Improve soil drainage if needed.",
+  expert_advice: "Note: This is a general recommendation. For accurate diagnosis and treatment, please consult with a local agricultural extension officer or plant pathologist. Consider getting a soil test and ensure proper plant nutrition for better disease resistance."
 });
 
 router.post("/treatment", async (req, res) => {
@@ -36,6 +55,13 @@ router.post("/treatment", async (req, res) => {
     // Ensure required fields are present
     if (!plantName || !detectedDisease || !observedSymptoms) {
       return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // If no valid API key, use fallback response
+    if (!genAI || !model) {
+      console.log("Using fallback treatment response (API key not configured)");
+      const fallbackTreatment = getFallbackTreatment(plantName, detectedDisease, preferredTreatmentType);
+      return res.json({ treatment: fallbackTreatment });
     }
 
     const prompt = `

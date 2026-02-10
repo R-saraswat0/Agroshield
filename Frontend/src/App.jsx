@@ -67,11 +67,13 @@ const App = () => {
             <Route path="createinquiry" element={<CreateForm />} />
             <Route path="updateinquiry/:id" element={<UpdateSubmittedForm />} />
             <Route path="deleteinquiry/:id" element={<DeleteSubmittedForm />} />
-            <Route path="aitreatment" element={<AiRecomendationForm />} />
             <Route path="myinquiries" element={<MyInquiries />} />
             <Route path="userprofile" element={<UserProfile />} />
             <Route path="managerresponses" element={<ManagerResponses />} />
           </Route>
+
+          {/* AI Treatment - Standalone (no sidebar) */}
+          <Route path="/aitreatment" element={<AiRecomendationForm />} />
 
           <Route path="/my-inquiriez" element={<MyInquiriez />} />
           <Route path="/manager-dashboard" element={<ManagerDashboard />} />

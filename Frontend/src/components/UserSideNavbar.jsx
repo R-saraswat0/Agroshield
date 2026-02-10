@@ -36,7 +36,7 @@ const UserSideNavbar = ({ user }) => {
 
   const menuItems = [
     { path: '/dashboard/userprofile', icon: <FaHome size={20} />, title: 'Profile' },
-    { path: '/dashboard/aitreatment', icon: <div className="relative">
+    { path: '/aitreatment', icon: <div className="relative">
       <FaRobot size={20} />
       <FaLeaf size={10} className="absolute -top-1 -right-1 text-green-500" />
     </div>, title: 'AI Recommendation' },

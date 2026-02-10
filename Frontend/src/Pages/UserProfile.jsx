@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useSnackbar } from 'notistack';
+import { API_URL } from '../config/api';
 import {
   FaUser,
   FaEnvelope,
@@ -29,20 +30,30 @@ const UserProfile = () => {
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData || !userData.token) {
-      enqueueSnackbar("No valid user session found.", { variant: "error" });
+      enqueueSnackbar("Please login to view profile", { variant: "error" });
       setLoading(false);
       return;
     }
 
     const fetchUserProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5557/api/test/profile', {
+        const response = await axios.get(`${API_URL}/api/test/profile`, {
           headers: { Authorization: `Bearer ${userData.token}` }
         });
-        setUserProfile(response.data);
+        setUserProfile({
+          name: response.data.fullName || response.data.username,
+          email: response.data.email,
+          phoneNumber: response.data.phoneNumber || 'Not provided',
+          location: response.data.location || 'Not provided',
+          joinDate: response.data.createdAt,
+          role: response.data.role,
+          profilePic: null
+        });
         setLoading(false);
       } catch (err) {
+        console.error('Profile fetch error:', err);
         setError('Failed to fetch user profile');
+        enqueueSnackbar('Failed to load profile', { variant: 'error' });
         setLoading(false);
       }
     };
@@ -117,7 +128,7 @@ const UserProfile = () => {
             </button>
           </div>
           <h2 className="text-2xl font-semibold text-center">{userProfile.name}</h2>
-          <p className="text-white text-lg font-bold mb-4 text-center">Plant Enthusiast</p>
+          <p className="text-white text-lg font-bold mb-4 text-center capitalize">{userProfile.role || 'Farmer'}</p>
           <div className="grid grid-cols-1 gap-4 w-full">
             <ProfileItem icon={FaEnvelope} value={userProfile.email} />
             <ProfileItem icon={FaPhone} value={userProfile.phoneNumber} />
