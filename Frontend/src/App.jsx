@@ -36,6 +36,7 @@ import ManagerDashboard from "./Pages/ManagerDashboard";
 import ManagerAlertForm from "./Pages/ManagerAlertForm";
 import UpdateAlerts from "./Pages/UpdateAlerts";
 import AgriStore from "./Pages/AgriStore";
+import TestStore from "./Pages/TestStore";
 
 import PlantDiseaseIdentifier from "./Pages/apitest";
 
@@ -90,6 +91,7 @@ const App = () => {
           <Route path="/materials/buy" element={<BuyMaterial />} />
           <Route path="/materials/analytics" element={<SupplierAnalytics />} />
           <Route path="/agristore" element={<AgriStore />} />
+          <Route path="/teststore" element={<TestStore />} />
           <Route path="/plantapi" element={<PlantDiseaseIdentifier />} />
         </Routes>
       </SnackbarProvider>
