@@ -40,8 +40,10 @@ const HomeMaterial = () => {
 
   const fetchMaterials = () => {
     setLoading(true);
+    console.log('Fetching mock materials...');
     // Use mock data instead of API call
     setTimeout(() => {
+      console.log('Mock materials loaded:', mockMaterials.length);
       setMaterials(mockMaterials);
       setLoading(false);
     }, 500);
