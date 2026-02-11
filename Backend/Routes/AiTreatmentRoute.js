@@ -14,6 +14,7 @@ if (!apiKey || apiKey === 'your_gemini_api_key_here') {
 const genAI = apiKey && apiKey !== 'your_gemini_api_key_here' ? new GoogleGenerativeAI(apiKey) : null;
 
 // Initialize Gemini model only if API key is valid
+// Using gemini-1.5-flash for fast and efficient AI responses
 const model = genAI ? genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
   systemInstruction: "Generate AI-based treatment recommendations for plant diseases in JSON format. Use simple and clear English.",
