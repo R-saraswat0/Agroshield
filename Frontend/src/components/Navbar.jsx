@@ -21,7 +21,8 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isHomePage = location.pathname === '/';
+  const showNavbarPages = ['/', '/materials', '/aitreatment'];
+  const shouldShowNavbar = showNavbarPages.includes(location.pathname);
 
   const navbarVariants = {
     hidden: { opacity: 0, y: -50 },
@@ -40,7 +41,7 @@ const Navbar = () => {
     hover: { scale: 1.1, transition: { duration: 0.2 } }
   };
 
-  if (!isHomePage) {
+  if (!shouldShowNavbar) {
     return null;
   }
 
