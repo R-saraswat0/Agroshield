@@ -645,6 +645,7 @@ const AiTreatmentForm = () => {
           </div>
         </div>
       </div>
+      </div>
     </>
   );
 };
