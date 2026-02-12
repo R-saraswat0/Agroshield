@@ -117,11 +117,16 @@ const HomeMaterial = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
+  console.log('HomeMaterial rendered');
+  console.log('Total mockMaterials:', mockMaterials.length);
+
   const filteredMaterials = mockMaterials.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  console.log('Filtered materials:', filteredMaterials.length);
 
   const getCategoryColor = (category) => {
     switch (category) {

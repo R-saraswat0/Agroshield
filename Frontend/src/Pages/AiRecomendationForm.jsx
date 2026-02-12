@@ -8,6 +8,7 @@ import { FaLeaf, FaVirus, FaThermometerHalf, FaCloudRain, FaHistory, FaShieldAlt
 import { FaRedo } from 'react-icons/fa';
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image } from "@react-pdf/renderer";
 import { API_URL } from '../config/api';
+import Navbar from '../components/Navbar';
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -246,7 +247,9 @@ const AiTreatmentForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-fixed" 
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-cover bg-center bg-fixed" 
     style={{ 
       backgroundImage: "url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
       backgroundColor: "rgba(243, 244, 246, 0.85)",
@@ -642,7 +645,7 @@ const AiTreatmentForm = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
