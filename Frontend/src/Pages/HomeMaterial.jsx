@@ -1,348 +1,214 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import Spinner from "../components/Spinner";
-import { MdSearch } from "react-icons/md";
-import { FaSort, FaEye, FaTrash } from "react-icons/fa";
-import SupplierSidebar from "../components/SupplierSidebar";
-import { motion, AnimatePresence } from "framer-motion";
-import ShowMaterial from "./ShowMaterial";
-import { Link } from "react-router-dom";
-import { FaEdit } from "react-icons/fa";
-import EditMaterial from "./EditMaterial";
-import ManagerNavBar from "../components/ManagerNavBar";
+import React, { useState } from 'react';
+import { FaShoppingCart, FaSearch } from 'react-icons/fa';
+import Navbar from '../components/Navbar';
 
 const mockMaterials = [
-  { _id: '1', materialName: "NPK 20-20-20 Fertilizer", category: "Fertilizer", pricePerUnit: 850, unitType: "kg", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500" },
-  { _id: '2', materialName: "Organic Compost", category: "Fertilizer", pricePerUnit: 450, unitType: "kg", image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500" },
-  { _id: '3', materialName: "Urea Fertilizer", category: "Fertilizer", pricePerUnit: 650, unitType: "kg", image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500" },
-  { _id: '4', materialName: "Cypermethrin Insecticide", category: "Pesticide", pricePerUnit: 1200, unitType: "liters", image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=500" },
-  { _id: '5', materialName: "Neem Oil Pesticide", category: "Pesticide", pricePerUnit: 950, unitType: "liters", image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=500" },
-  { _id: '6', materialName: "Glyphosate Herbicide", category: "Herbicide", pricePerUnit: 1100, unitType: "liters", image: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=500" },
-  { _id: '7', materialName: "2,4-D Herbicide", category: "Herbicide", pricePerUnit: 850, unitType: "liters", image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500" },
-  { _id: '8', materialName: "Potassium Sulphate", category: "Fertilizer", pricePerUnit: 1250, unitType: "kg", image: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=500" },
-  { _id: '9', materialName: "Micronutrient Mix", category: "Fertilizer", pricePerUnit: 350, unitType: "packs", image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500" },
-  { _id: '10', materialName: "BT Pesticide", category: "Pesticide", pricePerUnit: 750, unitType: "packs", image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500" },
-  { _id: '11', materialName: "Paraquat Herbicide", category: "Herbicide", pricePerUnit: 1350, unitType: "liters", image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500" },
-  { _id: '12', materialName: "Chlorpyrifos Pesticide", category: "Pesticide", pricePerUnit: 1500, unitType: "liters", image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500" }
+  {
+    id: 1,
+    name: "NPK 20-20-20 Fertilizer",
+    category: "Fertilizer",
+    price: 850,
+    unit: "kg",
+    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500",
+    description: "Complete balanced fertilizer for all crops"
+  },
+  {
+    id: 2,
+    name: "Organic Compost",
+    category: "Fertilizer",
+    price: 450,
+    unit: "kg",
+    image: "https://images.unsplash.com/photo-1592419044706-39796d40f98c?w=500",
+    description: "Rich organic matter for soil health"
+  },
+  {
+    id: 3,
+    name: "Urea Fertilizer",
+    category: "Fertilizer",
+    price: 650,
+    unit: "kg",
+    image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500",
+    description: "High nitrogen content for leafy growth"
+  },
+  {
+    id: 4,
+    name: "Cypermethrin Insecticide",
+    category: "Pesticide",
+    price: 1200,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=500",
+    description: "Effective against aphids and beetles"
+  },
+  {
+    id: 5,
+    name: "Neem Oil Pesticide",
+    category: "Pesticide",
+    price: 950,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=500",
+    description: "Natural organic pest control"
+  },
+  {
+    id: 6,
+    name: "Glyphosate Herbicide",
+    category: "Herbicide",
+    price: 1100,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1560493676-04071c5f467b?w=500",
+    description: "Non-selective weed killer"
+  },
+  {
+    id: 7,
+    name: "2,4-D Herbicide",
+    category: "Herbicide",
+    price: 850,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=500",
+    description: "Controls broadleaf weeds"
+  },
+  {
+    id: 8,
+    name: "Potassium Sulphate",
+    category: "Fertilizer",
+    price: 1250,
+    unit: "kg",
+    image: "https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?w=500",
+    description: "Improves fruit quality"
+  },
+  {
+    id: 9,
+    name: "Micronutrient Mix",
+    category: "Fertilizer",
+    price: 350,
+    unit: "pack",
+    image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=500",
+    description: "Essential trace elements"
+  },
+  {
+    id: 10,
+    name: "BT Pesticide",
+    category: "Pesticide",
+    price: 750,
+    unit: "pack",
+    image: "https://images.unsplash.com/photo-1615811361523-6bd03d7748e7?w=500",
+    description: "Biological caterpillar control"
+  },
+  {
+    id: 11,
+    name: "Paraquat Herbicide",
+    category: "Herbicide",
+    price: 1350,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=500",
+    description: "Fast-acting contact herbicide"
+  },
+  {
+    id: 12,
+    name: "Chlorpyrifos Pesticide",
+    category: "Pesticide",
+    price: 1500,
+    unit: "liter",
+    image: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=500",
+    description: "Controls soil insects"
+  }
 ];
 
 const HomeMaterial = () => {
-  const [materials, setMaterials] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortField, setSortField] = useState("materialName");
-  const [sortOrder, setSortOrder] = useState("asc");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [materialToDelete, setMaterialToDelete] = useState(null);
-  const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const [editingMaterial, setEditingMaterial] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const fetchMaterials = () => {
-    setLoading(true);
-    console.log('Fetching mock materials...');
-    // Use mock data instead of API call
-    setTimeout(() => {
-      console.log('Mock materials loaded:', mockMaterials.length);
-      setMaterials(mockMaterials);
-      setLoading(false);
-    }, 500);
-  };
-
-  useEffect(() => {
-    fetchMaterials();
-  }, []);
-
-  const openEditModal = (materialId) => {
-    setEditingMaterial(materialId);
-  };
-
-  const closeEditModal = () => {
-    setEditingMaterial(null);
-  };
-
-  // Update the handleMaterialUpdate function
-const handleMaterialUpdate = (updatedMaterial) => {
-  console.log("Updated material received:", updatedMaterial); // Add this for debugging
-  
-  // Refresh the entire materials list to ensure we have the latest data
-  fetchMaterials();
-  
-  // Close the edit modal
-  closeEditModal();
-};
-
-  const openDeleteModal = (materialId) => {
-    setMaterialToDelete(materialId);
-    setShowDeleteModal(true);
-  };
-
-  const closeDeleteModal = () => {
-    setShowDeleteModal(false);
-    setMaterialToDelete(null);
-  };
-
-  const handleDelete = async () => {
-    if (materialToDelete) {
-      try {
-        await axios.delete(
-          `http://localhost:5557/materials/${materialToDelete}`
-        );
-        setMaterials(
-          materials.filter((material) => material._id !== materialToDelete)
-        );
-        closeDeleteModal();
-      } catch (error) {
-        console.error("Error deleting material:", error);
-      }
-    }
-  };
-
-  const handleSort = (field) => {
-    if (field === sortField) {
-      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(field);
-      setSortOrder("asc");
-    }
-  };
+  const filteredMaterials = mockMaterials.filter(item => {
+    const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const getCategoryColor = (category) => {
-    switch (category.toLowerCase()) {
-      case "fertilizer":
-        return "bg-blue-400 text-white";
-      case "pesticide":
-        return "bg-red-400 text-white";
-      case "herbicide":
-        return "bg-green-400 text-white";
-      default:
-        return "bg-gray-400 text-white";
+    switch (category) {
+      case 'Fertilizer': return 'bg-green-500';
+      case 'Pesticide': return 'bg-red-500';
+      case 'Herbicide': return 'bg-yellow-500';
+      default: return 'bg-gray-500';
     }
   };
 
-  const openMaterialDetails = (materialId) => {
-    setSelectedMaterial(materialId);
-  };
-
-  const closeMaterialDetails = () => {
-    setSelectedMaterial(null);
-  };
-
-  const filteredAndSortedMaterials = materials
-    .filter(
-      (material) =>
-        material.materialName
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) &&
-        (filterCategory === "" || material.category === filterCategory)
-    )
-    .sort((a, b) => {
-      if (a[sortField] < b[sortField]) return sortOrder === "asc" ? -1 : 1;
-      if (a[sortField] > b[sortField]) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-
   return (
-    <div className="flex h-screen bg-gray-100 relative">
-      {/* Background Image */}
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-fixed"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
-          backgroundColor: "rgba(243, 244, 246, 1.2)",
-          backgroundBlendMode: "overlay",
-        }}
-      ></div>
-      <ManagerNavBar />
-      <div className="flex flex-1 overflow-hidden relative z-10">
-        <SupplierSidebar />
-        <div className="flex-1 overflow-auto p-8">
-          <div className="max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mt-20 mb-8">
-              Materials
-            </h1>
-            <div className="bg-white bg-opacity-30 backdrop-filter backdrop-blur-sm rounded-lg shadow-md p-6 mb-8">
-              <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                <div className="flex-1 min-w-[200px] relative">
-                  <input
-                    type="text"
-                    placeholder="Search materials..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full p-3 pl-10 border-2 border-green-400 rounded-full focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
-                  />
-                  <MdSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xl" />
-                </div>
-                <select
-                  value={filterCategory}
-                  onChange={(e) => setFilterCategory(e.target.value)}
-                  className="p-3 border border-green-300 rounded-md text-sm bg-green-100"
-                >
-                  <option value="">All Categories</option>
-                  <option value="Fertilizer">Fertilizer</option>
-                  <option value="Pesticide">Pesticide</option>
-                  <option value="Herbicide">Herbicide</option>
-                </select>
-                <button
-                  onClick={() => handleSort("materialName")}
-                  className="p-3 bg-green-100 text-gray-700 rounded-md hover:bg-green-500 hover:text-white transition-colors flex items-center text-sm"
-                >
-                  <FaSort className="mr-2" />
-                  Sort by Name
-                </button>
-                <button
-                  onClick={() => handleSort("pricePerUnit")}
-                  className="p-3 bg-green-100 text-gray-700 rounded-md hover:bg-green-500 hover:text-white transition-colors flex items-center text-sm"
-                >
-                  <FaSort className="mr-2" />
-                  Sort by Price
-                </button>
+    <>
+      <Navbar />
+      <div className="min-h-screen bg-gray-50 pt-20">
+        <div className="container mx-auto px-4 py-8 mt-16">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-800 mb-2">🌾 AgriStore</h1>
+            <p className="text-gray-600">Quality Agricultural Materials for Your Farm</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search materials..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                />
               </div>
-
-              {loading ? (
-                <Spinner />
-              ) : (
-                <section className="w-fit mx-auto grid grid-cols-1 lg:grid-cols-4 md:grid-cols-2 justify-items-center justify-center gap-y-20 gap-x-14 mt-10 mb-3 ml-3 mr-3">
-                  {filteredAndSortedMaterials.map((material) => (
-                    <div
-                      key={material._id}
-                      className="w-72 bg-white bg-opacity-80 backdrop-filter backdrop-blur-sm shadow-md rounded-xl duration-500 hover:scale-105 hover:shadow-xl transition-all relative"
-                    >
-                      <img
-                        src={
-                          material.image ||
-                          "https://via.placeholder.com/300x200?text=No+Image"
-                        }
-                        alt={material.materialName}
-                        className="h-80 w-72 object-cover rounded-t-xl"
-                      />
-                      <div className="px-4 py-3 w-72">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(
-                            material.category
-                          )}`}
-                        >
-                          {material.category}
-                        </span>
-                        <h3 className="text-base font-semibold text-gray-800 truncate block capitalize mt-2">
-                          {material.materialName}
-                        </h3>
-                        <p className="text-lg font-bold text-gray-800 mt-3 mb-10">
-                          Rs.{material.pricePerUnit.toFixed(2)} /{" "}
-                          <span className="text-sm font-normal text-gray-600">
-                            {material.unitType}
-                          </span>
-                        </p>
-                      </div>
-                      <div className="absolute bottom-3 left-3 flex items-center space-x-2">
-                        <button
-                          onClick={() => openMaterialDetails(material._id)}
-                          className="flex items-center text-green-600 px-3 rounded-full transition-colors text-sm hover:text-green-700"
-                        >
-                          <FaEye className="mr-1.5" />
-                          <span>View Details</span>
-                        </button>
-                        <button
-                          onClick={() => openEditModal(material._id)}
-                          className="flex items-center text-blue-600 px-3 rounded-full transition-colors text-sm hover:text-blue-700"
-                        >
-                          <FaEdit className="mr-1.5" />
-                          <span>Edit</span>
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(material._id)}
-                          className="flex items-center text-red-600 px-3 rounded-full transition-colors text-sm hover:text-red-700"
-                        >
-                          <FaTrash className="mr-1.5" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </section>
-              )}
-
-              {!loading && filteredAndSortedMaterials.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-xl text-gray-600">
-                    No materials found. Start by adding a new material.
-                  </p>
-                </div>
-              )}
+              
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="All">All Categories</option>
+                <option value="Fertilizer">Fertilizers</option>
+                <option value="Pesticide">Pesticides</option>
+                <option value="Herbicide">Herbicides</option>
+              </select>
             </div>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredMaterials.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div className="relative">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <span className={`absolute top-2 right-2 ${getCategoryColor(item.category)} text-white text-xs px-3 py-1 rounded-full`}>
+                    {item.category}
+                  </span>
+                </div>
+                
+                <div className="p-4">
+                  <h3 className="font-semibold text-gray-800 mb-2 line-clamp-2">{item.name}</h3>
+                  <p className="text-sm text-gray-600 mb-3">{item.description}</p>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-2xl font-bold text-green-600">Rs. {item.price}</span>
+                      <span className="text-sm text-gray-500">/{item.unit}</span>
+                    </div>
+                    <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                      <FaShoppingCart />
+                      <span>Buy</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {filteredMaterials.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">No materials found matching your criteria.</p>
+            </div>
+          )}
         </div>
       </div>
-
-      <AnimatePresence>
-      {editingMaterial && (
-        <EditMaterial 
-          id={editingMaterial} 
-          onClose={closeEditModal} 
-          onUpdate={handleMaterialUpdate} 
-        />
-      )}
-      </AnimatePresence>
-
-      {/* Material Details Popup */}
-      <AnimatePresence>
-        {selectedMaterial && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-60 backdrop-filter backdrop-blur-md flex items-center justify-center z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-lg p-8 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-            >
-              <ShowMaterial
-                id={selectedMaterial}
-                onClose={closeMaterialDetails}
-              />
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Delete Confirmation Modal */}
-      {showDeleteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-filter backdrop-blur-md flex items-center justify-center z-50">
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-lg p-8 max-w-md w-full mx-4"
-          >
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Delete Confirmation
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Are you sure you want to delete this material? This action cannot
-              be undone.
-            </p>
-            <div className="flex justify-end space-x-4">
-              <button
-                onClick={closeDeleteModal}
-                className="px-6 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDelete}
-                className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </motion.div>
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
