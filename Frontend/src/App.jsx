@@ -77,7 +77,6 @@ const App = () => {
             <Route path="myinquiries" element={<MyInquiries />} />
             <Route path="userprofile" element={<UserProfile />} />
             <Route path="managerresponses" element={<ManagerResponses />} />
-            <Route path="aitreatment" element={<AiRecomendationForm />} />
           </Route>
 
           {/* AI Treatment - Standalone (no sidebar) */}
