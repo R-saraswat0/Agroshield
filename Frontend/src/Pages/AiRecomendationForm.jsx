@@ -197,6 +197,7 @@ const TreatmentReportPDF = ({ formData, treatment }) => (
 
       );
 
+// AI Treatment Form Component
 const AiTreatmentForm = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
