@@ -34,6 +34,10 @@ const UserSideNavbar = ({ user }) => {
     collapsed: { width: '80px', transition: { type: 'spring', stiffness: 100, damping: 20 } },
   };
 
+  const handleNavigation = (path) => {
+    navigate(path);
+  };
+
   const menuItems = [
     { path: '/dashboard/userprofile', icon: <FaHome size={20} />, title: 'Profile' },
     { path: '/aitreatment', icon: <div className="relative">
@@ -90,17 +94,17 @@ const UserSideNavbar = ({ user }) => {
         <ul className="space-y-2 px-4">
           {menuItems.map((item, index) => (
             <motion.li key={index} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Link
-                to={item.path}
-                className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
-                  location.pathname.startsWith(item.path) 
+              <button
+                onClick={() => handleNavigation(item.path)}
+                className={`flex items-center p-3 rounded-lg transition-colors duration-200 w-full text-left ${
+                  location.pathname === item.path
                     ? 'bg-green-600 opacity-45 text-white' 
                     : 'text-gray-700 hover:bg-green-50 hover:text-green-600'
                 }`}
               >
                 <span className="mr-3">{item.icon}</span>
                 {!isCollapsed && <span>{item.title}</span>}
-              </Link>
+              </button>
             </motion.li>
           ))}
         </ul>
