@@ -677,14 +677,14 @@ const AiTreatmentForm = () => {
                       <p className="text-gray-700 text-left">Get personalized treatment recommendations</p>
                     </div>
                   </div>
-                )}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
