@@ -80,14 +80,7 @@ const App = () => {
           </Route>
 
           {/* AI Treatment - Standalone (no sidebar) */}
-          <Route 
-            path="/aitreatment" 
-            element={
-              <PrivateRoute allowedRoles={["farmer", "OrganicFarmer", "cropFarmer", "greenhouseFarmer", "forester", "gardener", "soilTester", "agriculturalResearcher"]}>
-                <AiRecomendationForm />
-              </PrivateRoute>
-            } 
-          />
+          <Route path="/aitreatment" element={<AiRecomendationForm />} />
 
           <Route path="/my-inquiriez" element={<MyInquiriez />} />
           <Route path="/manager-dashboard" element={<ManagerDashboard />} />

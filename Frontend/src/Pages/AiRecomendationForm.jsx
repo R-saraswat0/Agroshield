@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
@@ -8,6 +8,7 @@ import { FaLeaf, FaVirus, FaThermometerHalf, FaCloudRain, FaHistory, FaShieldAlt
 import { FaRedo } from 'react-icons/fa';
 import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image } from "@react-pdf/renderer";
 import { API_URL } from '../config/api';
+import LogingNavBar from '../components/LogingNavBar';
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -235,19 +236,36 @@ const AiTreatmentForm = () => {
     
     setLoading(true);
     try {
+      console.log('Sending request to:', `${API_URL}/ai/treatment`);
+      console.log('Form data:', formData);
+      
       const response = await axios.post(`${API_URL}/ai/treatment`, formData);
-      setTreatment(response.data.treatment);
-      enqueueSnackbar("Treatment recommendation generated successfully!", { variant: "success" });
-      setLoading(false);
+      
+      console.log('Response received:', response.data);
+      
+      if (response.data && response.data.treatment) {
+        setTreatment(response.data.treatment);
+        enqueueSnackbar("Treatment recommendation generated successfully!", { variant: "success" });
+      } else {
+        console.error('Invalid response format:', response.data);
+        enqueueSnackbar("Received invalid response from server", { variant: "error" });
+      }
     } catch (error) {
       console.error("Error fetching treatment:", error);
-      enqueueSnackbar("Failed to generate treatment recommendation", { variant: "error" });
+      console.error("Error response:", error.response?.data);
+      enqueueSnackbar(
+        error.response?.data?.message || "Failed to generate treatment recommendation", 
+        { variant: "error" }
+      );
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center bg-fixed" 
+    <>
+      <LogingNavBar />
+      <div className="min-h-screen bg-cover bg-center bg-fixed" 
     style={{ 
       backgroundImage: "url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
       backgroundColor: "rgba(243, 244, 246, 0.85)",
@@ -643,7 +661,7 @@ const AiTreatmentForm = () => {
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

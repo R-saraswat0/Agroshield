@@ -57,7 +57,7 @@ const NavigationBar = () => {
                         <Link to="/materials/buy" className="text-white hover:text-green-500">AgriStore</Link>
                     </li>
                     <li className="p-4 border-b-2 border-green-600 border-opacity-0 hover:border-opacity-100 hover:text-green-500 duration-200 cursor-pointer">
-                        <Link to="/dashboard/aitreatment" className="text-white hover:text-green-500">AI Treatments</Link>
+                        <Link to="/aitreatment" className="text-white hover:text-green-500">AI Treatments</Link>
                     </li>
                     <li className="p-4 border-b-2 border-green-600 border-opacity-0 hover:border-opacity-100 hover:text-green-500 duration-200 cursor-pointer">
                         <Link to="/dashboard/userprofile" className="text-white hover:text-green-500">AgriHub</Link>
