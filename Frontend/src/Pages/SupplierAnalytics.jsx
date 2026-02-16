@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Bar, Line } from "react-chartjs-2";
+import { Chart as ChartJS } from "chart.js/auto";
 import SupplierSidebar from "../components/SupplierSidebar";
+import ManagerNavBar from "../components/ManagerNavBar";
 import { FaBoxes, FaUsers, FaChartLine, FaDownload } from "react-icons/fa";
+import { BiLoaderCircle } from "react-icons/bi";
 import {
   Page,
   Text,
@@ -11,10 +15,10 @@ import {
   PDFDownloadLink,
   Image,
 } from "@react-pdf/renderer";
-import { Chart as ChartJS } from "chart.js/auto";
-import ManagerNavBar from "../components/ManagerNavBar";
+import { API_URL } from "../config/api";
 
-// PDF styles
+/* ================= PDF STYLES ================= */
+
 const styles = StyleSheet.create({
   page: { padding: 30, backgroundColor: "#f3f4f6" },
   title: {
@@ -68,83 +72,130 @@ const styles = StyleSheet.create({
   },
 });
 
-// PDF Document component
+/* ================= PDF COMPONENT ================= */
+
 const SupplierAnalyticsPDF = ({
   analyticsData,
   barChartImage,
   lineChartImage,
-}) => (
-  <Document>
-    <Page size="A4" style={styles.page}>
-      {/* Header */}
-      <Text style={styles.header}>
-        Generated on: {new Date().toLocaleString()}
-      </Text>
+}) => {
+  const totalUnits =
+    analyticsData?.mostSoldMaterial?.reduce(
+      (acc, item) => acc + item.unitsSold,
+      0
+    ) || 0;
 
-      <Text style={styles.title}>Supplier Analytics Report</Text>
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <Text style={styles.header}>
+          Generated on: {new Date().toLocaleString()}
+        </Text>
 
-      <View style={styles.cardContainer}>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Most Sold Supplier</Text>
-          <Text style={styles.cardValue}>
-            {analyticsData.mostSoldSupplier.name}
-          </Text>
+        <Text style={styles.title}>Supplier Analytics Report</Text>
+
+        <View style={styles.cardContainer}>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Most Sold Supplier</Text>
+            <Text style={styles.cardValue}>
+              {analyticsData?.mostSoldSupplier?.name || "N/A"}
+            </Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Total Units Sold</Text>
+            <Text style={styles.cardValue}>{totalUnits}</Text>
+          </View>
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Total Orders</Text>
+            <Text style={styles.cardValue}>{totalUnits}</Text>
+          </View>
         </View>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Units Sold</Text>
-          <Text style={styles.cardValue}>
-            {analyticsData.mostSoldMaterial.reduce(
-              (acc, item) => acc + item.unitsSold,
-              0
-            )}
-          </Text>
-        </View>
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Orders</Text>
-          <Text style={styles.cardValue}>
-            {analyticsData.mostSoldMaterial.reduce(
-              (acc, item) => acc + item.unitsSold,
-              0
-            )}
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Most Sold Materials</Text>
-        <Image style={styles.chart} src={barChartImage} />
-      </View>
+        {barChartImage && (
+          <View style={styles.chartContainer}>
+            <Text style={styles.chartTitle}>Most Sold Materials</Text>
+            <Image style={styles.chart} src={barChartImage} />
+          </View>
+        )}
 
-      <View style={styles.chartContainer}>
-        <Text style={styles.chartTitle}>Sales Trend</Text>
-        <Image style={styles.chart} src={lineChartImage} />
-      </View>
+        {lineChartImage && (
+          <View style={styles.chartContainer}>
+            <Text style={styles.chartTitle}>Sales Trend</Text>
+            <Image style={styles.chart} src={lineChartImage} />
+          </View>
+        )}
 
-      {/* Footer */}
-      <Text style={styles.footer}>
-        © 2023 SMART AGRIGUARD. All rights reserved.
-      </Text>
-    </Page>
-  </Document>
-);
+        <Text style={styles.footer}>
+          © {new Date().getFullYear()} SMART AGRIGUARD. All rights reserved.
+        </Text>
+      </Page>
+    </Document>
+  );
+};
+
+/* ================= MAIN COMPONENT ================= */
 
 const SupplierAnalytics = () => {
+  const [analyticsData, setAnalyticsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const [barChartImage, setBarChartImage] = useState(null);
   const [lineChartImage, setLineChartImage] = useState(null);
   const [pdfReady, setPdfReady] = useState(false);
 
-  // Dummy data for analytics
-  const analyticsData = {
-    mostSoldMaterial: [
-      { name: "Fertilizer A", unitsSold: 150 },
-      { name: "Pesticide B", unitsSold: 120 },
-      { name: "Seed C", unitsSold: 90 },
-    ],
-    mostSoldSupplier: { name: "Supplier X" },
-    salesTrend: [100, 120, 150, 130, 170, 160], // Example sales trend data
-  };
+  /* ========== FETCH DATA ========== */
 
-  const { mostSoldMaterial, mostSoldSupplier, salesTrend } = analyticsData;
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const userData = JSON.parse(localStorage.getItem("user"));
+
+        if (!userData?.token) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const response = await axios.get(
+          `${API_URL}/supplier/analytics`,
+          {
+            headers: { Authorization: `Bearer ${userData.token}` },
+          }
+        );
+
+        setAnalyticsData(response.data);
+      } catch (err) {
+        console.error("Error fetching analytics:", err);
+
+        setError("Using demo data. Backend not connected.");
+
+        setAnalyticsData({
+          mostSoldMaterial: [
+            { name: "Fertilizer A", unitsSold: 150 },
+            { name: "Pesticide B", unitsSold: 120 },
+            { name: "Seed C", unitsSold: 90 },
+          ],
+          mostSoldSupplier: { name: "Supplier X" },
+          salesTrend: [100, 120, 150, 130, 170, 160],
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
+
+  const mostSoldMaterial = analyticsData?.mostSoldMaterial || [];
+  const mostSoldSupplier = analyticsData?.mostSoldSupplier || {};
+  const salesTrend = analyticsData?.salesTrend || [];
+
+  const totalUnits = mostSoldMaterial.reduce(
+    (acc, item) => acc + item.unitsSold,
+    0
+  );
+
+  /* ========== CHART DATA ========== */
 
   const barChartData = {
     labels: mostSoldMaterial.map((item) => item.name),
@@ -163,54 +214,43 @@ const SupplierAnalytics = () => {
       {
         label: "Sales Trend",
         data: salesTrend,
-        fill: false,
         borderColor: "rgb(75, 192, 192)",
         tension: 0.1,
       },
     ],
   };
 
-  const generateChartImages = () => {
-    const chartOptions = {
-      responsive: false,
-      animation: false,
-      plugins: {
-        legend: {
-          display: true,
-          position: "top",
-        },
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
-      },
-    };
+  /* ========== GENERATE PDF CHART IMAGES ========== */
+
+  useEffect(() => {
+    if (!analyticsData) return;
 
     const barCanvas = document.createElement("canvas");
     barCanvas.width = 600;
     barCanvas.height = 300;
-    new ChartJS(barCanvas, {
+
+    const barChart = new ChartJS(barCanvas, {
       type: "bar",
       data: barChartData,
-      options: { ...chartOptions, maintainAspectRatio: false },
+      options: { responsive: false, animation: false },
     });
+
     setBarChartImage(barCanvas.toDataURL());
+    barChart.destroy();
 
     const lineCanvas = document.createElement("canvas");
     lineCanvas.width = 600;
     lineCanvas.height = 300;
-    new ChartJS(lineCanvas, {
+
+    const lineChart = new ChartJS(lineCanvas, {
       type: "line",
       data: lineChartData,
-      options: { ...chartOptions, maintainAspectRatio: false },
+      options: { responsive: false, animation: false },
     });
-    setLineChartImage(lineCanvas.toDataURL());
-  };
 
-  useEffect(() => {
-    generateChartImages();
-  }, []);
+    setLineChartImage(lineCanvas.toDataURL());
+    lineChart.destroy();
+  }, [analyticsData]);
 
   useEffect(() => {
     if (barChartImage && lineChartImage) {
@@ -218,223 +258,104 @@ const SupplierAnalytics = () => {
     }
   }, [barChartImage, lineChartImage]);
 
+  /* ================= UI ================= */
+
   return (
-    <div
-      className="min-h-screen bg-cover bg-center bg-fixed"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
-        backgroundColor: "rgba(243, 244, 246, 1.2)",
-        backgroundBlendMode: "overlay",
-      }}
-    >
+    <div className="min-h-screen bg-gray-100">
       <ManagerNavBar />
       <div className="flex h-screen">
         <SupplierSidebar />
+
         <div className="flex-1 overflow-auto">
           <div className="container mx-auto px-4 py-28">
-            <div className="flex justify-between items-center mb-12">
-              <h1 className="text-3xl font-bold text-gray-700">
-                Supplier Analytics
-              </h1>
-              {pdfReady ? (
-                <PDFDownloadLink
-                  document={
-                    <SupplierAnalyticsPDF
-                      analyticsData={analyticsData}
-                      barChartImage={barChartImage}
-                      lineChartImage={lineChartImage}
-                    />
-                  }
-                  fileName="supplier_analytics.pdf"
-                >
-                  {({ blob, url, loading, error }) => (
-                    <button
-                      className="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded flex items-center"
-                      disabled={loading}
+
+            {loading ? (
+              <div className="flex flex-col items-center justify-center h-96">
+                <BiLoaderCircle
+                  className="animate-spin text-green-600"
+                  size={64}
+                />
+                <p className="mt-4 text-gray-600 text-lg">
+                  Loading analytics...
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-12">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-700">
+                      Supplier Analytics
+                    </h1>
+                    {error && (
+                      <p className="text-yellow-600 text-sm mt-1">
+                        {error}
+                      </p>
+                    )}
+                  </div>
+
+                  {pdfReady && (
+                    <PDFDownloadLink
+                      document={
+                        <SupplierAnalyticsPDF
+                          analyticsData={analyticsData}
+                          barChartImage={barChartImage}
+                          lineChartImage={lineChartImage}
+                        />
+                      }
+                      fileName="supplier_analytics.pdf"
                     >
-                      <FaDownload className="mr-2" />
-                      {loading ? "Loading document..." : "Download PDF"}
-                    </button>
+                      {({ loading }) => (
+                        <button
+                          className="bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded flex items-center"
+                          disabled={loading}
+                        >
+                          <FaDownload className="mr-2" />
+                          {loading
+                            ? "Loading document..."
+                            : "Download PDF"}
+                        </button>
+                      )}
+                    </PDFDownloadLink>
                   )}
-                </PDFDownloadLink>
-              ) : (
-                <button
-                  className="bg-gray-400 text-white font-bold py-2 px-4 rounded flex items-center"
-                  disabled
-                >
-                  <FaDownload className="mr-2" />
-                  Preparing PDF...
-                </button>
-              )}
-            </div>
+                </div>
 
-            {/* Cards for Key Statistics */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              <StatCard
-                title="Most Sold Supplier"
-                value={mostSoldSupplier.name}
-                icon={<FaUsers className="text-blue-500" size={24} />}
-              />
-              <StatCard
-                title="Total Units Sold"
-                value={mostSoldMaterial.reduce(
-                  (acc, item) => acc + item.unitsSold,
-                  0
-                )}
-                icon={<FaBoxes className="text-green-500" size={24} />}
-              />
-              <StatCard
-                title="Total Orders"
-                value={mostSoldMaterial.reduce(
-                  (acc, item) => acc + item.unitsSold,
-                  0
-                )}
-                icon={<FaChartLine className="text-purple-500" size={24} />}
-              />
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                  <StatCard
+                    title="Most Sold Supplier"
+                    value={mostSoldSupplier.name}
+                    icon={<FaUsers size={24} />}
+                  />
+                  <StatCard
+                    title="Total Units Sold"
+                    value={totalUnits}
+                    icon={<FaBoxes size={24} />}
+                  />
+                  <StatCard
+                    title="Total Orders"
+                    value={totalUnits}
+                    icon={<FaChartLine size={24} />}
+                  />
+                </div>
 
-            {/* Charts */}
-           {/* Charts */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-  <ChartCard title="Most Sold Material">
-    <Bar
-      data={{
-        ...barChartData,
-        datasets: [
-          {
-            ...barChartData.datasets[0],
-            backgroundColor: [
-              "rgba(246, 189, 96, 0.9)",  // Golden yellow
-              "rgba(77, 182, 172, 0.9)",  // Teal
-              "rgba(229, 115, 115, 0.9)",  // Light red
-            ],
-            borderColor: [
-              "rgba(246, 189, 96, 1)",
-              "rgba(77, 182, 172, 1)",
-              "rgba(229, 115, 115, 1)",
-            ],
-            borderWidth: 0,
-            borderRadius: 6,
-            maxBarThickness: 50,
-          },
-        ],
-      }}
-      options={{
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            display: false,
-          },
-          tooltip: {
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            titleColor: "#333",
-            bodyColor: "#333",
-            borderColor: "#ddd",
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
-            titleFont: {
-              size: 14,
-              weight: "bold",
-            },
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: "#555", font: { size: 12 } },
-          },
-          y: {
-            grid: { color: "rgba(0, 0, 0, 0.05)" },
-            ticks: { color: "#555", font: { size: 12 } },
-          },
-        },
-      }}
-    />
-  </ChartCard>
-  <ChartCard title="Sales Trend">
-    <Line
-      data={{
-        ...lineChartData,
-        datasets: [
-          {
-            ...lineChartData.datasets[0],
-            label: "Online Sales",
-            borderColor: "rgba(33, 150, 243, 1)",  // Blue
-            backgroundColor: "rgba(33, 150, 243, 0.1)",
-            pointBackgroundColor: "rgba(33, 150, 243, 1)",
-            pointBorderColor: "#fff",
-            borderWidth: 3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.4,
-            fill: true,
-          },
-          {
-            label: "Offline Sales",
-            data: [80, 110, 70, 130, 90, 120],
-            borderColor: "rgba(255, 152, 0, 1)",  // Orange
-            backgroundColor: "rgba(255, 152, 0, 0.1)",
-            pointBackgroundColor: "rgba(255, 152, 0, 1)",
-            pointBorderColor: "#fff",
-            borderWidth: 3,
-            pointRadius: 4,
-            pointHoverRadius: 6,
-            tension: 0.4,
-            fill: true,
-          },
-        ],
-      }}
-      options={{
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: "top",
-            align: "end",
-            labels: {
-              boxWidth: 12,
-              usePointStyle: true,
-              pointStyle: "circle",
-              padding: 20,
-              color: "#555",
-              font: {
-                size: 12,
-              },
-            },
-          },
-          tooltip: {
-            backgroundColor: "rgba(255, 255, 255, 0.9)",
-            titleColor: "#333",
-            bodyColor: "#333",
-            borderColor: "#ddd",
-            borderWidth: 1,
-            padding: 12,
-            cornerRadius: 8,
-          },
-        },
-        scales: {
-          x: {
-            grid: { display: false },
-            ticks: { color: "#555", font: { size: 12 } },
-          },
-          y: {
-            grid: { color: "rgba(0, 0, 0, 0.05)" },
-            ticks: { color: "#555", font: { size: 12 } },
-          },
-        },
-      }}
-    />
-  </ChartCard>
-</div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  <ChartCard title="Most Sold Material">
+                    <Bar data={barChartData} />
+                  </ChartCard>
+
+                  <ChartCard title="Sales Trend">
+                    <Line data={lineChartData} />
+                  </ChartCard>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+/* ================= SMALL COMPONENTS ================= */
 
 const StatCard = ({ title, value, icon }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
@@ -443,27 +364,14 @@ const StatCard = ({ title, value, icon }) => (
         <h3 className="text-sm font-medium text-gray-500 mb-1">{title}</h3>
         <p className="text-2xl font-semibold text-gray-800">{value}</p>
       </div>
-      <div className="bg-blue-50 p-3 rounded-full">
-        {React.cloneElement(icon, { className: "text-blue-500" })}
-      </div>
-    </div>
-    <div className="mt-4 flex items-center">
-      <span className="text-green-500 text-sm font-medium">+12.5%</span>
-      <span className="text-gray-500 text-sm ml-2">from last month</span>
+      <div className="bg-blue-50 p-3 rounded-full">{icon}</div>
     </div>
   </div>
 );
 
 const ChartCard = ({ title, children }) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-    <div className="flex justify-between items-center mb-6">
-      <h2 className="text-lg font-medium text-gray-700">{title}</h2>
-      <button className="text-gray-400 hover:text-gray-600">
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
-        </svg>
-      </button>
-    </div>
+    <h2 className="text-lg font-medium text-gray-700 mb-6">{title}</h2>
     <div className="h-64">{children}</div>
   </div>
 );

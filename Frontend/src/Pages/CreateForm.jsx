@@ -1,65 +1,78 @@
-import React, { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { useDropzone } from "react-dropzone";
-import { useCallback, useEffect } from "react";
+import { API_URL } from '../config/api';
 
 export const CreateForm = ({ onClose, onSubmitSuccess }) => {
-  const [fullname, setFullname] = useState("");
-  const [email, setEmail] = useState("");
-  const [location, setLocation] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [plantName, setPlantName] = useState("");
-  const [diseaseName, setDiseaseName] = useState("");
-  const [issueDescription, setIssueDescription] = useState("");
-  const [image, setImage] = useState(null);
+  const [formData, setFormData] = useState({
+    fullname: "",
+    email: "",
+    location: "",
+    contactNumber: "",
+    plantName: "",
+    diseaseName: "",
+    issueDescription: "",
+    image: null,
+  });
 
-  const [fullnameError, setFullnameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [locationError, setLocationError] = useState("");
-  const [contactNumberError, setContactNumberError] = useState("");
+  const [errors, setErrors] = useState({
+    fullname: "",
+    email: "",
+    location: "",
+    contactNumber: "",
+  });
 
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
+  const validateForm = () => {
+    const { fullname, email, location, contactNumber, plantName, diseaseName, issueDescription, image } = formData;
+    return (
+      fullname && email && location && contactNumber && plantName && diseaseName && issueDescription && image &&
+      !errors.fullname && !errors.email && !errors.location && !errors.contactNumber
+    );
+  };
+
+  const getUserLocation = async () => {
+    return new Promise((resolve) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            console.log("Captured Geolocation:", latitude, longitude);
+            resolve({ latitude, longitude });
+          },
+          (error) => {
+            console.error("Error getting user location:", error);
+            resolve({ latitude: null, longitude: null });
+          }
+        );
+      } else {
+        resolve({ latitude: null, longitude: null });
+      }
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      fullname: "",
+      email: "",
+      location: "",
+      contactNumber: "",
+      plantName: "",
+      diseaseName: "",
+      issueDescription: "",
+      image: null,
+    });
+    setErrors({ fullname: "", email: "", location: "", contactNumber: "" });
+  };
+
   const handleSaveForm = async () => {
-    if (
-      !fullname ||
-      !email ||
-      !location ||
-      !contactNumber ||
-      !plantName ||
-      !diseaseName ||
-      !issueDescription ||
-      !image ||
-      fullnameError ||
-      emailError ||
-      locationError ||
-      contactNumberError
-    ) {
-      enqueueSnackbar("Please fill in all required fields correctly.", {
-        variant: "error",
-      });
+    if (!validateForm()) {
+      enqueueSnackbar("Please fill in all required fields correctly.", { variant: "error" });
       return;
     }
-
-    // Get user's live geolocation
-    const { latitude, longitude } = await getUserLocation();
-
-    const data = {
-      fullname,
-      email,
-      location,
-      contactNumber,
-      plantName,
-      diseaseName,
-      issueDescription,
-      latitude,
-      longitude,
-      image,
-    };
 
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData || !userData.token) {
@@ -69,114 +82,84 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
 
     setLoading(true);
 
-    // Send POST request with Authorization header
-    axios
-      .post("http://localhost:5557/farmer", data, {
-        headers: {
-          Authorization: `Bearer ${userData.token}`, // Include the token in the headers
-        },
-      })
-      .then(() => {
-        setLoading(false);
-        enqueueSnackbar("Form submitted successfully!", {
-          variant: "success",
-        });
-        onSubmitSuccess(); // Call this instead of navigating
-        onClose();
-      })
-      .catch((error) => {
-        setLoading(false);
-        enqueueSnackbar("Error submitting form.", { variant: "error" });
-        console.log(error);
+    try {
+      const { latitude, longitude } = await getUserLocation();
+
+      const data = { ...formData, latitude, longitude };
+
+      await axios.post(`${API_URL}/farmer`, data, {
+        headers: { Authorization: `Bearer ${userData.token}` },
       });
+
+      enqueueSnackbar("Form submitted successfully!", { variant: "success" });
+      resetForm();
+      onSubmitSuccess();
+      onClose();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        enqueueSnackbar("Session expired. Please login again.", { variant: "error" });
+        window.location.href = '/login';
+      } else {
+        enqueueSnackbar("Error submitting form.", { variant: "error" });
+        console.error(error);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ✅ Function to get user's live geolocation
-  const getUserLocation = async () => {
-    return new Promise((resolve, reject) => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-
-            // ✅ Debug: Log location values
-            console.log("Captured Geolocation:", latitude, longitude);
-
-            resolve({ latitude, longitude });
-          },
-          (error) => {
-            console.error("Error getting user location:", error);
-            resolve({ latitude: null, longitude: null }); // Ensures form still submits if location access is denied
-          }
-        );
-      } else {
-        resolve({ latitude: null, longitude: null }); // If geolocation is not supported, form will still submit
-      }
-    });
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleFullnameChange = (e) => {
     const { value } = e.target;
-    setFullname(value);
-
-    // Validate fullname (letters only)
-    if (!/^[a-zA-Z\s]+$/.test(value)) {
-      setFullnameError("Fullname should contain only letters and spaces.");
-    } else {
-      setFullnameError("");
-    }
+    handleInputChange('fullname', value);
+    setErrors(prev => ({
+      ...prev,
+      fullname: !/^[a-zA-Z\s]+$/.test(value) ? "Fullname should contain only letters and spaces." : ""
+    }));
   };
 
   const handleEmailChange = (e) => {
     const { value } = e.target;
-    setEmail(value);
-
-    // Validate email
-    if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value)) {
-      setEmailError("Email should be in the format example@domain.com.");
-    } else {
-      setEmailError("");
-    }
+    handleInputChange('email', value);
+    setErrors(prev => ({
+      ...prev,
+      email: !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(value) ? "Email should be in the format example@domain.com." : ""
+    }));
   };
 
   const handleLocationChange = (e) => {
     const { value } = e.target;
-    setLocation(value);
-
-    // Validate location (ensure it's not empty)
-    if (!value.trim()) {
-      setLocationError("Location is required.");
-    } else {
-      setLocationError("");
-    }
+    handleInputChange('location', value);
+    setErrors(prev => ({
+      ...prev,
+      location: !value.trim() ? "Location is required." : ""
+    }));
   };
 
   const handleContactNumberChange = (e) => {
     const { value } = e.target;
-    setContactNumber(value);
-
-    // Validate contact number (must be 10 digits)
-    if (!/^[0-9]{10}$/.test(value)) {
-      setContactNumberError("Contact Number should be a 10-digit number.");
-    } else {
-      setContactNumberError("");
-    }
+    handleInputChange('contactNumber', value);
+    setErrors(prev => ({
+      ...prev,
+      contactNumber: !/^[0-9]{10}$/.test(value) ? "Contact Number should be a 10-digit number." : ""
+    }));
   };
 
   const onDrop = useCallback(
     (acceptedFiles, fileRejections) => {
       if (acceptedFiles.length > 0) {
         const file = acceptedFiles[0];
-        if (file.size > 30720) {
-          // 30KB = 30 * 1024 bytes
-          enqueueSnackbar("Image size should not exceed 30KB", {
-            variant: "warning",
-          });
+        if (file.size > 2 * 1024 * 1024) {
+          enqueueSnackbar("Image size should not exceed 2MB", { variant: "warning" });
           return;
         }
         const reader = new FileReader();
         reader.onload = () => {
-          setImage(reader.result);
+          handleInputChange('image', reader.result);
         };
         reader.readAsDataURL(file);
       }
@@ -184,7 +167,7 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
       if (fileRejections.length > 0) {
         fileRejections.forEach((rejection) => {
           if (rejection.errors[0].code === "file-too-large") {
-            enqueueSnackbar(`Max size is 30KB.`, { variant: "error" });
+            enqueueSnackbar(`Max size is 2MB.`, { variant: "error" });
           }
         });
       }
@@ -195,7 +178,7 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
   const { getRootProps, getInputProps, fileRejections } = useDropzone({
     onDrop,
     accept: "image/*",
-    maxSize: 30720, // 30KB
+    maxSize: 2 * 1024 * 1024, // 2MB
   });
 
   useEffect(() => {
@@ -267,17 +250,17 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="text"
-                  value={fullname}
+                  value={formData.fullname}
                   onChange={handleFullnameChange}
                   className={`w-full px-4 py-2 rounded-lg border ${
-                    fullnameError
+                    errors.fullname
                       ? "border-red-500"
                       : "border-gray-300 focus:border-green-500"
                   } focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors`}
                   placeholder="Enter your full name"
                 />
-                {fullnameError && (
-                  <p className="mt-1 text-sm text-red-500">{fullnameError}</p>
+                {errors.fullname && (
+                  <p className="mt-1 text-sm text-red-500">{errors.fullname}</p>
                 )}
               </div>
 
@@ -287,17 +270,17 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="email"
-                  value={email}
+                  value={formData.email}
                   onChange={handleEmailChange}
                   className={`w-full px-4 py-2 rounded-lg border ${
-                    emailError
+                    errors.email
                       ? "border-red-500"
                       : "border-gray-300 focus:border-green-500"
                   } focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors`}
                   placeholder="example@email.com"
                 />
-                {emailError && (
-                  <p className="mt-1 text-sm text-red-500">{emailError}</p>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-500">{errors.email}</p>
                 )}
               </div>
 
@@ -307,17 +290,17 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="text"
-                  value={location}
+                  value={formData.location}
                   onChange={handleLocationChange}
                   className={`w-full px-4 py-2 rounded-lg border ${
-                    locationError
+                    errors.location
                       ? "border-red-500"
                       : "border-gray-300 focus:border-green-500"
                   } focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors`}
                   placeholder="Your location"
                 />
-                {locationError && (
-                  <p className="mt-1 text-sm text-red-500">{locationError}</p>
+                {errors.location && (
+                  <p className="mt-1 text-sm text-red-500">{errors.location}</p>
                 )}
               </div>
 
@@ -327,18 +310,18 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="tel"
-                  value={contactNumber}
+                  value={formData.contactNumber}
                   onChange={handleContactNumberChange}
                   className={`w-full px-4 py-2 rounded-lg border ${
-                    contactNumberError
+                    errors.contactNumber
                       ? "border-red-500"
                       : "border-gray-300 focus:border-green-500"
                   } focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors`}
                   placeholder="10-digit phone number"
                 />
-                {contactNumberError && (
+                {errors.contactNumber && (
                   <p className="mt-1 text-sm text-red-500">
-                    {contactNumberError}
+                    {errors.contactNumber}
                   </p>
                 )}
               </div>
@@ -372,8 +355,8 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="text"
-                  value={plantName}
-                  onChange={(e) => setPlantName(e.target.value)}
+                  value={formData.plantName}
+                  onChange={(e) => handleInputChange('plantName', e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border
                    border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors"
                   placeholder="Enter plant name"
@@ -386,8 +369,8 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 </label>
                 <input
                   type="text"
-                  value={diseaseName}
-                  onChange={(e) => setDiseaseName(e.target.value)}
+                  value={formData.diseaseName}
+                  onChange={(e) => handleInputChange('diseaseName', e.target.value)}
                   className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors"
                   placeholder="Enter disease name (if known)"
                 />
@@ -404,9 +387,9 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-300"
               >
                 <input {...getInputProps()} />
-                {image ? (
+                {formData.image ? (
                   <img
-                    src={image}
+                    src={formData.image}
                     alt="Preview"
                     className="mx-auto max-h-40 object-contain"
                   />
@@ -418,7 +401,7 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
               </div>
 
               <p className="text-sm text-gray-400 mt-2">
-                Max file size: 30KB. Accepted formats: jpg, png, etc.
+                Max file size: 2MB. Accepted formats: jpg, png, etc.
               </p>
             </div>
             </div>
@@ -449,8 +432,8 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
                 Describe the Issue <span className="text-red-500">*</span>
               </label>
               <textarea
-                value={issueDescription}
-                onChange={(e) => setIssueDescription(e.target.value)}
+                value={formData.issueDescription}
+                onChange={(e) => handleInputChange('issueDescription', e.target.value)}
                 rows="4"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none transition-colors"
                 placeholder="Please describe the issue you're experiencing with your plant in detail..."
@@ -464,17 +447,17 @@ export const CreateForm = ({ onClose, onSubmitSuccess }) => {
               onClick={handleSaveForm}
               disabled={
                 loading ||
-                fullnameError ||
-                emailError ||
-                locationError ||
-                contactNumberError
+                errors.fullname ||
+                errors.email ||
+                errors.location ||
+                errors.contactNumber
               }
               className={`px-8 py-3 rounded-lg text-white font-medium text-lg shadow-md transition-all transform hover:scale-105 ${
                 loading ||
-                fullnameError ||
-                emailError ||
-                locationError ||
-                contactNumberError
+                errors.fullname ||
+                errors.email ||
+                errors.location ||
+                errors.contactNumber
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700 hover:shadow-lg"
               }`}

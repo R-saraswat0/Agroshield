@@ -1,14 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { MdOutlineHealthAndSafety, MdOutlineSpeed, MdOutlineTipsAndUpdates } from "react-icons/md";
 import { BiLoaderCircle } from "react-icons/bi";
 import { FaLeaf, FaVirus, FaThermometerHalf, FaCloudRain, FaHistory, FaShieldAlt, FaSeedling, FaDownload  } from 'react-icons/fa';
 import { FaRedo } from 'react-icons/fa';
-import { Page, Text, View, Document, StyleSheet, PDFDownloadLink, Image } from "@react-pdf/renderer";
+import { Page, Text, View, Document, StyleSheet, PDFDownloadLink } from "@react-pdf/renderer";
 import { API_URL } from '../config/api';
-import Navbar from '../components/Navbar';
 
 // PDF styles
 const styles = StyleSheet.create({
@@ -199,10 +197,10 @@ const TreatmentReportPDF = ({ formData, treatment }) => (
       );
 
 const AiTreatmentForm = () => {
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [treatment, setTreatment] = useState(null);
+  const [error, setError] = useState(null);
   
   const [formData, setFormData] = useState({
     plantName: "",
@@ -227,29 +225,53 @@ const AiTreatmentForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate required fields
     if (!formData.plantName || !formData.detectedDisease || !formData.observedSymptoms) {
       enqueueSnackbar("Please fill in all required fields", { variant: "error" });
       return;
     }
     
+    const userData = JSON.parse(localStorage.getItem("user"));
+    if (!userData || !userData.token) {
+      enqueueSnackbar("Please login to continue", { variant: "error" });
+      window.location.href = '/login';
+      return;
+    }
+    
     setLoading(true);
+    setError(null);
+    
     try {
-      const response = await axios.post(`${API_URL}/ai/treatment`, formData);
+      const response = await axios.post(`${API_URL}/ai/treatment`, formData, {
+        headers: {
+          Authorization: `Bearer ${userData.token}`,
+        },
+      });
+      
+      if (!response.data?.treatment) {
+        throw new Error("Invalid response structure");
+      }
+      
       setTreatment(response.data.treatment);
       enqueueSnackbar("Treatment recommendation generated successfully!", { variant: "success" });
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching treatment:", error);
-      enqueueSnackbar("Failed to generate treatment recommendation", { variant: "error" });
+      
+      if (error.response?.status === 401) {
+        localStorage.clear();
+        enqueueSnackbar("Session expired. Please login again.", { variant: "error" });
+        window.location.href = '/login';
+      } else {
+        const errorMsg = error.response?.data?.message || "Failed to generate treatment recommendation";
+        setError(errorMsg);
+        enqueueSnackbar(errorMsg, { variant: "error" });
+      }
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="min-h-screen bg-cover bg-center bg-fixed" 
+    <div className="min-h-screen bg-cover bg-center bg-fixed" 
     style={{ 
       backgroundImage: "url('https://images.unsplash.com/photo-1523348837708-15d4a09cfac2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80')",
       backgroundColor: "rgba(243, 244, 246, 0.85)",
@@ -583,6 +605,7 @@ const AiTreatmentForm = () => {
                     <button
                       onClick={() => {
                         setTreatment(null);
+                        setError(null);
                         setFormData({
                           plantName: "",
                           detectedDisease: "",
@@ -610,6 +633,21 @@ const AiTreatmentForm = () => {
                   <p className="text-green-100">Your AI-generated recommendations will appear here</p>
                 </div>
                 
+                {error ? (
+                  <div className="p-6 flex flex-col items-center justify-center h-[500px] text-center">
+                    <div className="w-24 h-24 rounded-full bg-red-100 flex items-center justify-center mb-6">
+                      <FaVirus className="h-12 w-12 text-red-500" />
+                    </div>
+                    <h3 className="text-xl font-medium text-gray-900 mb-2">Error Generating Treatment</h3>
+                    <p className="text-red-600 max-w-md mb-8">{error}</p>
+                    <button
+                      onClick={() => setError(null)}
+                      className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Try Again
+                    </button>
+                  </div>
+                ) : (
                 <div className="p-6 flex flex-col items-center justify-center h-[500px] text-center">
                   <div className="w-24 h-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
                     <FaLeaf className="h-12 w-12 text-green-500" />
@@ -639,14 +677,14 @@ const AiTreatmentForm = () => {
                       <p className="text-gray-700 text-left">Get personalized treatment recommendations</p>
                     </div>
                   </div>
+                )}
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
-      </div>
-    </>
+    </div>
   );
 };
 

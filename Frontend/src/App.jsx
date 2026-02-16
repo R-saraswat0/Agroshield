@@ -63,7 +63,14 @@ const App = () => {
           <Route path="/admin/viewarticle" element={<ArticleView />} />
 
           {/* Inquiry Form & AI Recommendation Routes */}
-          <Route path="/dashboard" element={<Dashboard />}>
+          <Route 
+            path="/dashboard" 
+            element={
+              <PrivateRoute allowedRoles={["farmer", "OrganicFarmer", "cropFarmer", "greenhouseFarmer", "forester", "gardener", "soilTester", "agriculturalResearcher"]}>
+                <Dashboard />
+              </PrivateRoute>
+            }
+          >
             <Route path="createinquiry" element={<CreateForm />} />
             <Route path="updateinquiry/:id" element={<UpdateSubmittedForm />} />
             <Route path="deleteinquiry/:id" element={<DeleteSubmittedForm />} />
@@ -92,7 +99,11 @@ const App = () => {
           <Route path="/materials/edit/:id" element={<EditMaterial />} />
           {/* <Route path='/materials/delete/:id' element={<DeleteMaterial />} /> */}
           <Route path="/materials/buy" element={<BuyMaterial />} />
-          <Route path="/materials/analytics" element={<SupplierAnalytics />} />
+          <Route path="/materials/analytics" element={
+            <PrivateRoute allowedRoles={["supplier"]}>
+              <SupplierAnalytics />
+            </PrivateRoute>
+          } />
           <Route path="/agristore" element={<AgriStore />} />
           <Route path="/teststore" element={<TestStore />} />
           <Route path="/plantapi" element={<PlantDiseaseIdentifier />} />

@@ -93,7 +93,7 @@ const UserSideNavbar = ({ user }) => {
               <Link
                 to={item.path}
                 className={`flex items-center p-3 rounded-lg transition-colors duration-200 ${
-                  location.pathname === item.path 
+                  location.pathname.startsWith(item.path) 
                     ? 'bg-green-600 opacity-45 text-white' 
                     : 'text-gray-700 hover:bg-green-50 hover:text-green-600'
                 }`}
@@ -112,7 +112,7 @@ const UserSideNavbar = ({ user }) => {
           whileTap={{ scale: 0.97 }}
           className="flex items-center p-3 w-full rounded-lg text-red-500 hover:bg-red-50 transition-colors duration-200"
           onClick={() => {
-            localStorage.removeItem('token');
+            localStorage.clear();
             navigate('/login');
           }}
         >
