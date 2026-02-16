@@ -93,22 +93,35 @@ router.post("/treatment", async (req, res) => {
       }
     `;
 
-    // Call Gemini AI
-    let aiResponse = await model.generateContent(prompt); // Use 'let' instead of 'const'
-    aiResponse = await aiResponse.response.text();
+    try {
+      // Call Gemini AI
+      let aiResponse = await model.generateContent(prompt);
+      aiResponse = await aiResponse.response.text();
 
-    console.log("Raw AI Response:", aiResponse); // Debugging: log response
+      console.log("Raw AI Response:", aiResponse);
 
-    // Clean up markdown formatting if present
-    aiResponse = aiResponse.replace(/```json|```/g, "").trim();
+      // Clean up markdown formatting if present
+      aiResponse = aiResponse.replace(/```json|```/g, "").trim();
 
-    // Parse JSON safely
-    const parsedResponse = JSON.parse(aiResponse);
+      // Parse JSON safely
+      const parsedResponse = JSON.parse(aiResponse);
 
-    res.json({  treatment: parsedResponse }); // Ensure valid JSON response
+      res.json({ treatment: parsedResponse });
+    } catch (aiError) {
+      console.error("AI generation failed, using fallback:", aiError.message);
+      // If AI fails, use fallback
+      const fallbackTreatment = getFallbackTreatment(plantName, detectedDisease, preferredTreatmentType);
+      return res.json({ treatment: fallbackTreatment });
+    }
   } catch (error) {
     console.error("Error generating AI treatment:", error);
-    res.status(500).json({ message: "Error generating treatment recommendation", error: error.message });
+    // Always return fallback on any error
+    try {
+      const fallbackTreatment = getFallbackTreatment(plantName, detectedDisease, preferredTreatmentType);
+      return res.json({ treatment: fallbackTreatment });
+    } catch (fallbackError) {
+      return res.status(500).json({ message: "Error generating treatment recommendation", error: error.message });
+    }
   }
 });
 
