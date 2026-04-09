@@ -23,7 +23,21 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Middleware for handling CORS policy
 app.use(cors({
-  origin: ['https://agroshield-ashen.vercel.app', 'http://localhost:5173'],
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:4173',
+      'https://agroshield-ashen.vercel.app',
+      /\.vercel\.app$/,
+    ];
+    if (!origin || allowedOrigins.some(o => 
+      typeof o === 'string' ? o === origin : o.test(origin)
+    )) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 
