@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { MdOutlineHealthAndSafety, MdOutlineSpeed, MdOutlineTipsAndUpdates } from "react-icons/md";
 import { BiLoaderCircle } from "react-icons/bi";
@@ -200,7 +199,6 @@ const TreatmentReportPDF = ({ formData, treatment }) => (
 
 // AI Treatment Form Component
 const AiTreatmentForm = () => {
-  const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
   const [treatment, setTreatment] = useState(null);
@@ -583,7 +581,7 @@ const AiTreatmentForm = () => {
                       fileName={`${formData.plantName}_Treatment_Report.pdf`}
                       className="flex-1"
                     >
-                      {({ blob, url, loading, error }) => (
+                      {({ loading }) => (
                         <button
                           className={`w-full flex justify-center items-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-base font-medium text-white ${
                             loading ? "bg-green-400" : "bg-green-600 hover:bg-green-700"

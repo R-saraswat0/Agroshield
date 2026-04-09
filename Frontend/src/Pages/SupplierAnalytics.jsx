@@ -250,7 +250,7 @@ const SupplierAnalytics = () => {
 
     setLineChartImage(lineCanvas.toDataURL());
     lineChart.destroy();
-  }, [analyticsData]);
+  }, [analyticsData, barChartData, lineChartData]);
 
   useEffect(() => {
     if (barChartImage && lineChartImage) {

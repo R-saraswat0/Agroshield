@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaEdit, FaTrash, FaUserPlus, FaSearch, FaTimes, FaChevronDown, FaFilter, FaFilePdf, FaFileExcel, FaFileAlt, FaDownload } from 'react-icons/fa';
@@ -21,7 +21,6 @@ const roleColors = {
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -180,7 +179,7 @@ const UserManagement = () => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
-      <AdminSidebar user={user} />
+      <AdminSidebar />
       
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-auto">

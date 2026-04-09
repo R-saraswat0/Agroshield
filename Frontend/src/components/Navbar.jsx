@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { FaCaretDown } from 'react-icons/fa';
 
 const Navbar = () => {
@@ -24,23 +24,6 @@ const Navbar = () => {
   const showNavbarPages = ['/', '/materials', '/aitreatment'];
   const shouldShowNavbar = showNavbarPages.includes(location.pathname);
 
-  const navbarVariants = {
-    hidden: { opacity: 0, y: -50 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: { 
-        type: "spring", 
-        stiffness: 100, 
-        damping: 15 
-      }
-    }
-  };
-
-  const linkVariants = {
-    hover: { scale: 1.1, transition: { duration: 0.2 } }
-  };
-
   if (!shouldShowNavbar) {
     return null;
   }
@@ -50,10 +33,6 @@ const Navbar = () => {
       {isVisible && (
         <motion.nav
           key="navbar"
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          variants={navbarVariants}
           className={`fixed w-full z-30 transition-opacity duration-100 ${
             isScrolled 
               ? 'bg-black bg-opacity-20 backdrop-filter backdrop-blur-lg' 

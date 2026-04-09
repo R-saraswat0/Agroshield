@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import {
   FaEdit,
@@ -14,8 +14,6 @@ import {
 } from "react-icons/fa";
 import { MdSearch } from "react-icons/md";
 import { useSnackbar } from "notistack";
-import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import CreateForm from "../Pages/CreateForm";
 import UpdateSubmittedForm from "./UpdateSubmittedForm";
 import DeleteSubmittedForm from "./DeleteSubmittedForm";
@@ -49,13 +47,8 @@ const MyInquiries = () => {
    const [filterStatus, setFilterStatus] = useState('');
   
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchInquiries();
-  }, []);
-
-  const fetchInquiries = async () => {
+  const fetchInquiries = useCallback(async () => {
     try {
       const userData = JSON.parse(localStorage.getItem("user"));
       if (!userData || !userData.token) {
@@ -80,7 +73,11 @@ const MyInquiries = () => {
       enqueueSnackbar("Failed to load inquiries", { variant: "error" });
       setLoading(false);
     }
-  };
+  }, [enqueueSnackbar]);
+
+  useEffect(() => {
+    fetchInquiries();
+  }, [fetchInquiries]);
 
   const handleCreateInquiry = () => {
     setShowCreateForm(true);
@@ -316,6 +313,7 @@ const MyInquiries = () => {
       {selectedInquiry && (
         <InquiryDetailsPopup
           inquiry={selectedInquiry}
+          placeholderImage={placeholderImages[0]}
           onClose={() => setSelectedInquiry(null)}
         />
       )}
@@ -363,7 +361,7 @@ const MyInquiries = () => {
  
 };
 
-const InquiryDetailsPopup = ({ inquiry, onClose }) => {
+const InquiryDetailsPopup = ({ inquiry, placeholderImage, onClose }) => {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -381,7 +379,7 @@ const InquiryDetailsPopup = ({ inquiry, onClose }) => {
           {/* Left side - Image */}
           <div className="w-2/5 bg-green-100">
             <img
-              src={inquiry.image? inquiry.image : placeholderImages[index % placeholderImages.length]}
+              src={inquiry.image || placeholderImage}
               alt={inquiry.plantName}
               className="w-full h-full object-cover"
             />
@@ -434,12 +432,15 @@ const InquiryDetailsPopup = ({ inquiry, onClose }) => {
   );
 };
 
-const DetailItem = ({ icon: Icon, label, value }) => (
-  <div className="flex items-center">
-    <Icon className="text-green-500 mr-2" size={20} />
-    <span className="text-gray-700 font-medium">{label}:</span>
-    <span className="ml-2 text-gray-600">{value}</span>
-  </div>
-);
+const DetailItem = ({ icon, label, value }) => {
+  const Icon = icon;
+  return (
+    <div className="flex items-center">
+      <Icon className="text-green-500 mr-2" size={20} />
+      <span className="text-gray-700 font-medium">{label}:</span>
+      <span className="ml-2 text-gray-600">{value}</span>
+    </div>
+  );
+};
 
 export default MyInquiries;

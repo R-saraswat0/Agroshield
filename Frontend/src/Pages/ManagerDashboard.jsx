@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import BubbleMap from "../components/BubbleMap";
 import ReportsTab from "../components/ReportsTab";
@@ -15,7 +15,6 @@ import {
   FaEye,
   FaEdit,
 } from "react-icons/fa";
-import { motion } from "framer-motion";
 
 const sidebarVariants = {
   expanded: { width: "260px" },
@@ -37,11 +36,7 @@ const ManagerDashboard = () => {
   const userData = JSON.parse(localStorage.getItem("user"));
   const token = userData?.token;
 
-  useEffect(() => {
-    fetchForms();
-  }, [statusFilter, searchQuery, searchDate]);
-
-  const fetchForms = async () => {
+  const fetchForms = useCallback(async () => {
     try {
       const response = await axios.get("http://localhost:5557/manager/forms", {
         headers: { Authorization: `Bearer ${token}` },
@@ -53,7 +48,11 @@ const ManagerDashboard = () => {
       console.error("Error fetching forms:", error);
       setLoading(false);
     }
-  };
+  }, [statusFilter, searchQuery, searchDate, token]);
+
+  useEffect(() => {
+    fetchForms();
+  }, [fetchForms]);
 
   const updateStatus = async (id, status) => {
     try {

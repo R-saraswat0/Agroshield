@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const UserdashboardContent = () => {
   const [weather, setWeather] = useState({ temp: 0, humidity: 0, condition: 'Loading...', windSpeed: 0 });
-  const [city, setCity] = useState('Colombo');
+  const [city] = useState('Colombo');
 
   useEffect(() => {
     const fetchWeather = async () => {

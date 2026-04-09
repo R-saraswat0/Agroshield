@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { FaLeaf, FaSearch, FaMobileAlt,FaCheckCircle, FaChevronDown,FaClock } from 'react-icons/fa';
 import { RiPlantLine } from 'react-icons/ri';
 import { useNavigate } from 'react-router-dom';
@@ -41,28 +41,6 @@ const Home = () => {
       excerpt: "We break down the pros and cons of different treatment approaches for your crops.",
       date: "2023-07-05",
       image: "https://th.bing.com/th/id/R.1fa7b43360bdadd5b2e9a49d621242a1?rik=ah0S53PGybCaRw&pid=ImgRaw&r=0"
-    }
-  ];
-
-  // Success Story
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Organic Farmer",
-      quote: "SmartAgriGuard's AI detection saved my tomato crop from a blight outbreak. The early warning and targeted treatment plan were game-changers!",
-      image: "/images/testimonial-sarah.jpg"
-    },
-    {
-      name: "Michael Chen",
-      role: "Agricultural Researcher",
-      quote: "The disease mapping feature has been invaluable for our regional studies. It's providing insights that would have taken years to gather manually.",
-      image: "/images/testimonial-michael.jpg"
-    },
-    {
-      name: "Elena Rodriguez",
-      role: "Small-scale Farmer",
-      quote: "As a new farmer, the Health Hub has been my go-to resource. The expert advice and AI recommendations have given me confidence in managing my crops.",
-      image: "/images/testimonial-elena.jpg"
     }
   ];
 
@@ -128,25 +106,6 @@ const Home = () => {
         </AnimatePresence>
       </div>
     );
-  };
-
-  // Contacts Section
-  const contactInfo = {
-    email: "support@smartagriguard.com",
-    phone: "+1 (555) 123-4567",
-    address: "123 AgriTech Lane, Farmville, CA 94123",
-    socialMedia: {
-      facebook: "https://facebook.com/smartagriguard",
-      twitter: "https://twitter.com/smartagriguard",
-      instagram: "https://instagram.com/smartagriguard"
-    }
-  };
-
-  const newsletterSignup = {
-    title: "Stay Updated with SmartAgriGuard",
-    description: "Subscribe to our newsletter for the latest in AI-powered agriculture, crop protection tips, and exclusive offers.",
-    placeholder: "Enter your email address",
-    buttonText: "Subscribe"
   };
 
   return (

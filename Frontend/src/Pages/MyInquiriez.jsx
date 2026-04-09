@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 
 const MyInquiriez = () => {
@@ -7,11 +7,7 @@ const MyInquiriez = () => {
   const [loading, setLoading] = useState(true);
   const [showAlerts, setShowAlerts] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, [showAlerts]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const userData = JSON.parse(localStorage.getItem("user"));
@@ -39,7 +35,11 @@ const MyInquiriez = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showAlerts]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getSeverityLabel = (severity) => {
     const base = "px-3 py-1 rounded-full text-white";

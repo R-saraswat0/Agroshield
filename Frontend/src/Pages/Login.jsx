@@ -16,8 +16,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [showWelcome, setShowWelcome] = useState(false);
   const [userData, setUserData] = useState(null);
 
@@ -30,7 +28,6 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
     try {
@@ -81,8 +78,6 @@ const Login = () => {
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please try again.');
       console.error('Login error:', err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -152,9 +147,6 @@ const Login = () => {
     {showPassword ? <MdVisibilityOff size={24} /> : <MdVisibility size={24} />}
   </span>
   {error && <p className="text-red-500 text-xs italic mt-2">{error}</p>}
-  {successMessage && (
-    <p className="text-green-500 text-xs italic mt-2">{successMessage}</p>
-  )}
 </div>
           <div className="items-center justify-between">
             <button

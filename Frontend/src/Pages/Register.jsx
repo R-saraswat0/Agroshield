@@ -6,7 +6,6 @@ import { ToastContainer, toast } from "react-toastify"; // Import ToastContainer
 import "react-toastify/dist/ReactToastify.css"; // Import Toastify styles
 import BackgroundSvg from "../images/114.svg"; // Import the background SVG
 import { countries } from '../components/CountriesForPhone'; // Import the countries array
-import { motion } from 'framer-motion';//+
 import { parsePhoneNumber } from 'libphonenumber-js'; // Import the parsePhoneNumber function
 import leftLeaf from '../images/p4.png';
 import rightLeaf from '../images/p4.png';
@@ -93,7 +92,7 @@ function Register() {
 
     try {
       // Send registration request
-      const response = await axios.post(
+      await axios.post(
         `${API_URL}/api/auth/register`,
         userData
       );
@@ -175,7 +174,7 @@ const validateForm = () => {
       if (!phoneNumber.isValid()) {
         errors.phoneNumber = "Invalid phone number for selected country";
       }
-    } catch (error) {
+    } catch {
       errors.phoneNumber = "Invalid phone number";
     }
   }

@@ -6,18 +6,6 @@ import * as XLSX from 'xlsx';
 
 const API_BASE_URL = 'http://localhost:5557/api';
 
-// Define role colors for consistent styling across reports
-const roleColors = {
-  'farmer': { color: '#4CAF50', bgColor: '#E8F5E9' },
-  'OrganicFarmer': { color: '#2196F3', bgColor: '#E3F2FD' },
-  'cropFarmer': { color: '#FFC107', bgColor: '#FFF8E1' },
-  'greenhouseFarmer': { color: '#9C27B0', bgColor: '#F3E5F5' },
-  'forester': { color: '#3F51B5', bgColor: '#E8EAF6' },
-  'gardener': { color: '#E91E63', bgColor: '#FCE4EC' },
-  'soilTester': { color: '#607D8B', bgColor: '#ECEFF1' },
-  'agriculturalResearcher': { color: '#FF5722', bgColor: '#FBE9E7' }
-};
-
 export const ReportService = {
   /**
    * Generate and download a report based on user data
@@ -163,7 +151,7 @@ export const ReportService = {
           valign: 'middle'
         },
         margin: { top: 15, left: 14, right: 14 },
-        didDrawPage: function(data) {
+        didDrawPage: function() {
           // Add page number and company name on each page
           doc.setFontSize(8);
           doc.setTextColor(150, 150, 150);

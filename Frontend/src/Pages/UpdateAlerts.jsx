@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import { useSnackbar } from "notistack";
 import LogingNavBar from '../components/MNavigationBar ';
@@ -21,7 +21,7 @@ const UpdateAlerts = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { enqueueSnackbar } = useSnackbar();
 
-  const fetchAlerts = async () => {
+  const fetchAlerts = useCallback(async () => {
     const userData = JSON.parse(localStorage.getItem("user"));
     if (!userData?.token) return;
 
@@ -37,16 +37,16 @@ const UpdateAlerts = () => {
       );
 
       setAlerts(ownAlerts);
-    } catch (err) {
+    } catch {
       enqueueSnackbar("Failed to load alerts", { variant: "error" });
     } finally {
       setLoading(false);
     }
-  };
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     fetchAlerts();
-  }, []);
+  }, [fetchAlerts]);
 
   const handleDelete = async (id) => {
     const userData = JSON.parse(localStorage.getItem("user"));
@@ -60,7 +60,7 @@ const UpdateAlerts = () => {
       });
       enqueueSnackbar("Alert deleted", { variant: "success" });
       fetchAlerts();
-    } catch (err) {
+    } catch {
       enqueueSnackbar("Delete failed", { variant: "error" });
     }
   };
@@ -87,7 +87,7 @@ const UpdateAlerts = () => {
       setEditingId(null);
       setEditedAlert({});
       fetchAlerts();
-    } catch (err) {
+    } catch {
       enqueueSnackbar("Failed to update alert", { variant: "error" });
     }
   };

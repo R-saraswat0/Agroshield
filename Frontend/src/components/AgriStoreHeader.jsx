@@ -25,7 +25,7 @@ const AgriStoreHeader = () => {
       setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [slides.length]);
 
   return (
     <div className="bg-gradient-to-b from-green-800 to-green-600 py-6">

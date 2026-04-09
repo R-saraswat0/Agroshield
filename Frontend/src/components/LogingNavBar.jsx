@@ -1,39 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../../src/index.css";
 import { FaUser , FaSignOutAlt } from "react-icons/fa";
 
 const NavigationBar = () => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [user, setUser] = useState(null);
     const navigate = useNavigate();
-  
-    useEffect(() => {
-      const checkLoginStatus = () => {
-        const storedUser = localStorage.getItem("user");
-        const token = localStorage.getItem("authToken");
-  
-        if (storedUser && token) {
-          setIsLoggedIn(true);
-        } else {
-          setUser(null);
-          setIsLoggedIn(false);
-        }
-      };
-  
-      checkLoginStatus();
-      window.addEventListener('storage', checkLoginStatus);
-  
-      return () => {
-        window.removeEventListener('storage', checkLoginStatus);
-      };
-    }, []);
   
     const handleSignOut = () => {
       localStorage.removeItem("user");
       localStorage.removeItem("authToken");
-      setUser(null);
-      setIsLoggedIn(false);
       navigate("/");
     };
 

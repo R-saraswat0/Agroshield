@@ -4,7 +4,6 @@ import { FaTimes, FaPlus, FaMinus, FaShoppingCart } from 'react-icons/fa';
 import Spinner from './Spinner';
 
 const MaterialDetailsModal = ({ 
-  selectedMaterial, 
   materialDetails, 
   loadingDetails, 
   closeMaterialDetails, 
